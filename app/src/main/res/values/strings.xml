@@ -8,7 +8,7 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
 
-    <string name="menu_home">خانه</string>
+    <string name="menu_home">فال حافظ پیشرفته</string>
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
     <string name="menu_tools">Tools</string>
@@ -23,9 +23,7 @@
     <string name="sampleEvaluation">بسیار انسان سخت کوش و پشتکاری هستید و تا نتیجه ی کار حاصل نشود دست از عمل برنمی دارید. نتایج کارتان همیشه ماندنی است و بقیه نیز از آن استفاده می کنند. شما تا آخرین لحظات زندگی به تمام آرزوهایتان خواهید رسید. به فقرا کمک کنید. نام شما و ذکر خیرتان همه جا بر سر زبانهاست.</string>
     <string name="doa">ای حافظ شیرازی! تو محرم هر رازی! تو را به خدا و شاخه نبات قسمت میدهم که هرچه صلاح و مصلحت می بینی برایم اشکار و آرزوی من بر آورده سازی. (شاید بهتر باشد برای شادی روح حضرت حافظ صلوات یا فاتحه ای نثار نمیاییم)</string>
     <string name="niat_konid">نیت کنید و روی گنبد حضرت حافظ اشارتی بفرمایید.</string>
-
-
-
+    <string name="add_to_faves">افزودن به علاقه مندی ها</string>
 
 
 </resources>

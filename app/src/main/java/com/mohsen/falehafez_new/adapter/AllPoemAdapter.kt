@@ -34,7 +34,9 @@ class AllPoemAdapter (val context: Context, val items: List<String>, val itemCli
         fun bind(firstItem:Int,secondItem:String, clickListener: ItemClickListener){
             title.text= "غزل شماره ${firstItem+1}"
             poemFirstHemistich.text=secondItem
-            clickListener.onItemClicked(firstItem)
+            itemView.setOnClickListener {
+                clickListener.onItemClicked(firstItem)
+            }
 
         }
     }

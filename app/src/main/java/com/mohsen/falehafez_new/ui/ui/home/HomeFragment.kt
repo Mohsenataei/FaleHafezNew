@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -42,7 +43,8 @@ class HomeFragment : Fragment() {
         navController = Navigation.findNavController(view)
 
         hafezTomb.setOnClickListener {
-            navController.navigate(R.id.action_nav_home_to_hafezFragment)
+            val bundle = bundleOf("index" to "500")
+            navController.navigate(R.id.action_nav_home_to_hafezFragment,bundle)
         }
 
 

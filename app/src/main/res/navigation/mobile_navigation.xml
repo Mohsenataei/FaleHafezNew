@@ -16,10 +16,14 @@
     </fragment>
 
     <fragment
-        android:id="@+id/nav_faves"
+        android:id="@+id/nav_all"
         android:name="com.mohsen.falehafez_new.ui.ui.gallery.GalleryFragment"
         android:label="@string/menu_fav"
-        tools:layout="@layout/fragment_gallery" />
+        tools:layout="@layout/fragment_gallery" >
+        <action
+            android:id="@+id/action_nav_all_to_hafezFragment"
+            app:destination="@id/hafezFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_slideshow"
@@ -48,5 +52,9 @@
         android:id="@+id/hafezFragment"
         android:name="com.mohsen.falehafez_new.ui.ui.hafez.HafezFragment"
         android:label="fragment_hafez"
-        tools:layout="@layout/fragment_hafez" />
+        tools:layout="@layout/fragment_hafez" >
+        <argument
+            android:name="poemIndex"
+            app:argType="string" />
+    </fragment>
 </navigation>
