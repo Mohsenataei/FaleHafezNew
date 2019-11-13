@@ -7,12 +7,14 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.LinearLayout
 import android.widget.SeekBar
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.doOnLayout
+import androidx.core.view.marginTop
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.NavController
@@ -32,12 +34,16 @@ import com.mohsen.falehafez_new.ui.ui.hafez.HafezViewModel as HafezViewModel1
  */
 class HafezFragment : Fragment() {
 
+    val array = intArrayOf(1,2,3,4)
     lateinit var navController: NavController
     lateinit var adapter: PoemAdapter
     lateinit var hafezViewModel: HafezViewModel1
     lateinit var resourceHelper: ResourceHelper
+    lateinit var userPrefs: UserPrefs
+    lateinit var faved: String
     lateinit var seekBar: SeekBar
-   // lateinit var mediaPlayer: MediaPlayer
+    var index = 0
+    // lateinit var mediaPlayer: MediaPlayer
     var isPlaying = false
 
 
@@ -53,6 +59,7 @@ class HafezFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
         poemIndex = arguments!!.getString("index")!!
     }
     override fun onCreateView(
@@ -72,8 +79,16 @@ class HafezFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         navController = Navigation.findNavController(view)
+        userPrefs = UserPrefs(activity!!)
+        faved = userPrefs.getFavedPoems(activity!!)
+        convertFavedPoemIndexToString(array)
         seekBar = view.findViewById(R.id.appCompatSeekBar)
         val rnd = genRanNum()
+//        val parent = poemRecycler.parent as ViewGroup
+//        val layoutparam = parent.layoutParams as FrameLayout.LayoutParams
+//        var marginLayoutParams = ViewGroup.MarginLayoutParams(poemRecycler.layoutParams)
+//        marginLayoutParams.setMargins(0,param.height,0,0)
+//        poemRecycler.layoutParams = marginLayoutParams
         mediaPlayer = MediaPlayer.create(activity!!,R.raw.hafez_001)
 
         playPoemButton.setOnClickListener{
@@ -167,6 +182,7 @@ class HafezFragment : Fragment() {
             evaluate= ResourceHelper.getInstance(activity!!).getEvaluate()
             poemFirstHemistich.text = items[0]
             poemTitle.text = "غزل شماره ${rnd+1}"
+            index = rnd
         }else {
             context!!.toast("came from gallery")
             ResourceHelper.getInstance(activity!!).getPoemData(activity!!,poemIndex.toInt())
@@ -174,6 +190,7 @@ class HafezFragment : Fragment() {
             evaluate= ResourceHelper.getInstance(activity!!).getEvaluate()
             poemFirstHemistich.text = items[0]
             poemTitle.text = "غزل شماره ${poemIndex.toInt()+1}"
+            index = poemIndex.toInt()
         }
 
 
@@ -250,6 +267,33 @@ class HafezFragment : Fragment() {
             handler.postDelayed(runnable, 1000)
         }
         handler.postDelayed(runnable, 1000)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        inflater!!.inflate(R.menu.hafez,menu)
+        super.onCreateOptionsMenu(menu, inflater)
+
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        return when(item!!.itemId){
+            R.id.hafez_fave_option ->{
+                item.setIcon(R.drawable.ic_favorite_black_24dp)
+                userPrefs.setFavedPoems(activity!!,index)
+                Log.d("prefs", userPrefs.getFavedPoems(activity!!))
+                context!!.toast("added to list")
+                return true
+            }
+            else ->
+                super.onOptionsItemSelected(item)
+        }
+
+    }
+
+    private fun isFaved(): Boolean {
+        if (userPrefs.getFavedPoemList(activity!!).contains(index.toString()))
+            return true
+        return false
     }
 }
 

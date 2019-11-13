@@ -2,6 +2,7 @@ package com.mohsen.falehafez_new.util
 
 import android.content.Context
 import android.media.MediaPlayer
+import android.util.Log
 import android.widget.Toast
 
 fun Context.toast(message: String){
@@ -19,3 +20,12 @@ val MediaPlayer.currentSeconds:Int
     get() {
         return this.currentPosition/1000
     }
+
+fun convertFavedPoemIndexToString(indexes: IntArray): String{
+    var tmp = ""
+    for (index in indexes){
+        tmp = tmp.plus("$index").plus(",")
+    }
+    Log.d("Convert",tmp)
+    return tmp
+}

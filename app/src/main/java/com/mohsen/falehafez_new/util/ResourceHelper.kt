@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.mohsen.falehafez_new.R
+import com.mohsen.falehafez_new.model.FavedPoem
 
 class ResourceHelper(context: Context) {
 
@@ -62,6 +63,22 @@ class ResourceHelper(context: Context) {
             title = randomPoem.substring(0,randomPoem.indexOf("m"))
             Log.d("allPoems",title)
             titles.add(title)
+        }
+        return titles
+    }
+
+    fun getFavesList(context: Context,list: List<String>): List<FavedPoem>{
+        Log.d("getFavesList","list size is : ${list.size}")
+        var titles: MutableList<FavedPoem> = ArrayList()
+        var title = ""
+        for (i in 0..list.size.minus(1)){
+            if (list[i] != ""){
+                getPoemData(context,list[i].toInt())
+                title = randomPoem.substring(0,randomPoem.indexOf("m"))
+                Log.d("getFavesList",title)
+                titles.add(FavedPoem(list[i],title))
+            }
+
         }
         return titles
     }
