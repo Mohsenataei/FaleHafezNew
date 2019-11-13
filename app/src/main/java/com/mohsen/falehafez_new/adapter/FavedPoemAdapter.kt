@@ -31,7 +31,8 @@ class FavedPoemAdapter (val context: Context, val items: List<FavedPoem>, privat
         private val poemFirstHemistich: TextView = view.poemFirstHemistich
 
         fun bind(firstItem:String,secondItem:String, clickListener: ItemClickListener){
-            title.text= "غزل شماره $firstItem"
+            val index = firstItem.toInt().plus(1)
+            title.text= "غزل شماره $index"
             poemFirstHemistich.text=secondItem
             itemView.setOnClickListener {
                 clickListener.onItemClicked(firstItem.toInt())
