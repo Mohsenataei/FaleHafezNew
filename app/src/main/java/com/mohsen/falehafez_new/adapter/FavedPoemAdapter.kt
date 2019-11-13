@@ -23,7 +23,7 @@ class FavedPoemAdapter (val context: Context, val items: List<FavedPoem>, privat
     }
 
     override fun onBindViewHolder(holder: FavedHolder, position: Int) {
-        holder.bind(items[position].index, items[position].title,itemClickListener)
+        holder.bind(items[position].index.toString(), items[position].title,itemClickListener)
     }
 
     class FavedHolder(view: View): RecyclerView.ViewHolder(view) {

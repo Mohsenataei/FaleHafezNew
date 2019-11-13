@@ -67,17 +67,16 @@ class ResourceHelper(context: Context) {
         return titles
     }
 
-    fun getFavesList(context: Context,list: List<String>): List<FavedPoem>{
+    fun getFavesList(context: Context,list: List<Int>): List<FavedPoem>{
         Log.d("getFavesList","list size is : ${list.size}")
         var titles: MutableList<FavedPoem> = ArrayList()
         var title = ""
         for (i in 0..list.size.minus(1)){
-            if (list[i] != ""){
+
                 getPoemData(context,list[i].toInt())
                 title = randomPoem.substring(0,randomPoem.indexOf("m"))
                 Log.d("getFavesList",title)
                 titles.add(FavedPoem(list[i],title))
-            }
 
         }
         return titles

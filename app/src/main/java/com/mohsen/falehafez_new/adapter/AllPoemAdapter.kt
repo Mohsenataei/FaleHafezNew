@@ -27,6 +27,7 @@ class AllPoemAdapter (val context: Context, val items: List<String>, val itemCli
     override fun onBindViewHolder(holder: ListHolder, position: Int) {
         holder.bind(position,items[position],itemClickListener)
     }
+
     class ListHolder(view: View): RecyclerView.ViewHolder(view) {
         private val title : TextView = view.poemNumberTextView
         private val poemFirstHemistich: TextView = view.poemFirstHemistich
@@ -37,7 +38,6 @@ class AllPoemAdapter (val context: Context, val items: List<String>, val itemCli
             itemView.setOnClickListener {
                 clickListener.onItemClicked(firstItem)
             }
-
         }
     }
 

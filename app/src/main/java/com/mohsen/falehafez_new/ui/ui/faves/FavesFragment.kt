@@ -37,7 +37,7 @@ class FavesFragment : Fragment(), ItemClickListener {
     private lateinit var adapter: FavedPoemAdapter
     private lateinit var list: List<FavedPoem>
     private lateinit var layoutManager: LinearLayoutManager
-    private lateinit var favedPoems: List<String>
+    private lateinit var favedPoems: List<Int>
     private lateinit var userPrefs: UserPrefs
 
     override fun onCreateView(
@@ -63,10 +63,10 @@ class FavesFragment : Fragment(), ItemClickListener {
 
         val aaa : MutableList<Int> = ArrayList<Int>()
         for (item in favedPoems){
-            Log.d("Faves", item)
-            if (item != ""){
+            Log.d("Faves", item.toString())
+
                 aaa.add(item.toInt())
-            }
+
         }
 
         if(favedPoems.isEmpty()){
@@ -78,12 +78,5 @@ class FavesFragment : Fragment(), ItemClickListener {
             favesPoemsRecycler.layoutManager = LinearLayoutManager(activity!!)
             favesPoemsRecycler.adapter = adapter
         }
-
-
-
-
-
-
-
     }
 }

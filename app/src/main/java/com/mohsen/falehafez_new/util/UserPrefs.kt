@@ -13,7 +13,7 @@ class UserPrefs (context: Context){
 
     fun setFavedPoems(context: Context, index: Int) {
         favedList = getFavedPoems(context)
-        favedList = favedList.plus("$index").plus(",")
+        favedList = favedList.makeFavList().apply { add(index)}.concatFavList()
         val editor = getSharedPreferences(context).edit()
         editor.putString("indexes",favedList)
         editor.apply()
@@ -22,12 +22,20 @@ class UserPrefs (context: Context){
         return getSharedPreferences(context).getString("indexes","")!!
     }
 
-    fun getFavedPoemList(context: Context) : List<String> {
-        var indexes: List<String> = ArrayList()
-        indexes = getSharedPreferences(context).getString("indexes","")!!.split(",")
-        Log.d("userPrefs","${indexes.size}")
-         return indexes
+    fun getFavedPoemList(context: Context) =
+        getSharedPreferences(context).getString("indexes","")!!.split(",").map { it.toInt() }.also {
+            Log.d("userPrefs","${it.size}")
+        }
+
+    fun String.makeFavList():MutableList<Int>{
+        if(isBlank())
+            return mutableListOf()
+        return split(",").map { it.toInt() }.toMutableList().also {
+            Log.d("userPrefs", "${it.size}")
+        }
+
     }
+    fun List<Int>.concatFavList()=joinToString(",")
 }
 
 

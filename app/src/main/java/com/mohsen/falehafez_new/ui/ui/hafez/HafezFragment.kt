@@ -90,6 +90,7 @@ class HafezFragment : Fragment() {
 //        marginLayoutParams.setMargins(0,param.height,0,0)
 //        poemRecycler.layoutParams = marginLayoutParams
         mediaPlayer = MediaPlayer.create(activity!!,R.raw.hafez_001)
+        initializeSeekBar()
 
         playPoemButton.setOnClickListener{
             context!!.toast("detect click")
@@ -108,7 +109,7 @@ class HafezFragment : Fragment() {
                 context!!.toast("media playing")
 
             }
-            initializeSeekBar()
+
             playPoemButton.isEnabled = false
             pausePoemButton.isEnabled = true
             stopPoemButton.isEnabled = true
@@ -258,13 +259,10 @@ class HafezFragment : Fragment() {
         appCompatSeekBar.max = mediaPlayer.seconds
 
         runnable = Runnable {
-            appCompatSeekBar.progress = mediaPlayer.currentSeconds
-
-//            tv_pass.text = "${mediaPlayer.currentSeconds} sec"
-//            val diff = mediaPlayer.seconds - mediaPlayer.currentSeconds
-//            tv_due.text = "$diff sec"
-
-            handler.postDelayed(runnable, 1000)
+            appCompatSeekBar?.let {
+                it.progress = mediaPlayer.currentSeconds
+                handler.postDelayed(runnable, 1000)
+            }
         }
         handler.postDelayed(runnable, 1000)
     }
@@ -290,10 +288,10 @@ class HafezFragment : Fragment() {
 
     }
 
-    private fun isFaved(): Boolean {
-        if (userPrefs.getFavedPoemList(activity!!).contains(index.toString()))
-            return true
-        return false
-    }
+//    private fun isFaved(): Boolean {
+//        if (userPrefs.getFavedPoemList(activity!!).contains(index.toString()))
+//            return true
+//        return false
+//    }
 }
 

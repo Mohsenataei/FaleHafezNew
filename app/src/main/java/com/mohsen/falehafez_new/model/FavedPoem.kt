@@ -1,5 +1,5 @@
 package com.mohsen.falehafez_new.model
 data class FavedPoem (
-    val index: String,
+    val index: Int,
     val title: String
 )
