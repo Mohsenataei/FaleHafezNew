@@ -14,7 +14,9 @@ import android.widget.LinearLayout
 import android.widget.SeekBar
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.doOnLayout
+import androidx.core.view.get
 import androidx.core.view.marginTop
+import androidx.core.widget.NestedScrollView
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.NavController
@@ -84,6 +86,13 @@ class HafezFragment : Fragment() {
         convertFavedPoemIndexToString(array)
         seekBar = view.findViewById(R.id.appCompatSeekBar)
         val rnd = genRanNum()
+        PoemInterpretationTv.doOnLayout {
+            val height = PoemInterpretationTv.height
+            val layoutParam = nestedScrollView.getChildAt(0).layoutParams as FrameLayout.LayoutParams
+            layoutParam.topMargin = height
+            nestedScrollView.getChildAt(0).layoutParams = layoutParam
+            nestedScrollView.getChildAt(0).requestLayout()
+        }
 //        val parent = poemRecycler.parent as ViewGroup
 //        val layoutparam = parent.layoutParams as FrameLayout.LayoutParams
 //        var marginLayoutParams = ViewGroup.MarginLayoutParams(poemRecycler.layoutParams)
@@ -268,7 +277,12 @@ class HafezFragment : Fragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
-        inflater!!.inflate(R.menu.hafez,menu)
+        if (isFaved(index)){
+            inflater!!.inflate(R.menu.hafez_bookmarked,menu)
+        }else{
+            inflater!!.inflate(R.menu.hafez,menu)
+        }
+
         super.onCreateOptionsMenu(menu, inflater)
 
     }
@@ -276,10 +290,17 @@ class HafezFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         return when(item!!.itemId){
             R.id.hafez_fave_option ->{
-                item.setIcon(R.drawable.ic_favorite_black_24dp)
-                userPrefs.setFavedPoems(activity!!,index)
-                Log.d("prefs", userPrefs.getFavedPoems(activity!!))
-                context!!.toast("added to list")
+                if (isFaved(index)){
+                    item.setIcon(R.drawable.ic_favorite_border_black_24dp)
+                    userPrefs.removeFromFaveList(activity!!,index)
+                    Log.d("prefs", userPrefs.getFavedPoems(activity!!))
+                    context!!.toast("poem removed from faved list")
+                }else{
+                    item.setIcon(R.drawable.ic_favorite_black_24dp)
+                    userPrefs.setFavedPoems(activity!!,index)
+                    Log.d("prefs", userPrefs.getFavedPoems(activity!!))
+                    context!!.toast("added to list")
+                }
                 return true
             }
             else ->
@@ -288,10 +309,12 @@ class HafezFragment : Fragment() {
 
     }
 
-//    private fun isFaved(): Boolean {
-//        if (userPrefs.getFavedPoemList(activity!!).contains(index.toString()))
+    private fun isFaved(index: Int): Boolean {
+//        val faves = userPrefs.getFavedPoemList(activity!!)
+//        if (faves.contains(index))
 //            return true
-//        return false
-//    }
+        return false
+    }
+
 }
 
