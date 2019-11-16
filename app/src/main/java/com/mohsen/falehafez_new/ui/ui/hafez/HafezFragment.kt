@@ -37,6 +37,9 @@ import com.mohsen.falehafez_new.ui.ui.hafez.HafezViewModel as HafezViewModel1
 class HafezFragment : Fragment() {
 
     val array = intArrayOf(1,2,3,4)
+    val FILE_PREFIX = "Hafez - "
+    val FILE_POSFIX = ".mp3"
+    val BASE_URL = "http://localhost:8086/downloadFile/Hafez - "
     lateinit var navController: NavController
     lateinit var adapter: PoemAdapter
     lateinit var hafezViewModel: HafezViewModel1
@@ -86,6 +89,7 @@ class HafezFragment : Fragment() {
         convertFavedPoemIndexToString(array)
         seekBar = view.findViewById(R.id.appCompatSeekBar)
         val rnd = genRanNum()
+
         PoemInterpretationTv.doOnLayout {
             val height = PoemInterpretationTv.height
             val layoutParam = nestedScrollView.getChildAt(0).layoutParams as FrameLayout.LayoutParams
@@ -93,12 +97,39 @@ class HafezFragment : Fragment() {
             nestedScrollView.getChildAt(0).layoutParams = layoutParam
             nestedScrollView.getChildAt(0).requestLayout()
         }
+        if (poemIndex == "500"){
+            context!!.toast("came from home")
+            ResourceHelper.getInstance(activity!!).getPoemData(activity!!,rnd)
+            items = ResourceHelper.getInstance(activity!!).getPoems()
+            evaluate= ResourceHelper.getInstance(activity!!).getEvaluate()
+            poemFirstHemistich.text = items[0]
+            poemTitle.text = "غزل شماره ${rnd+1}"
+            index = rnd
+        }else {
+            context!!.toast("came from gallery")
+            ResourceHelper.getInstance(activity!!).getPoemData(activity!!,poemIndex.toInt())
+            items = ResourceHelper.getInstance(activity!!).getPoems()
+            evaluate= ResourceHelper.getInstance(activity!!).getEvaluate()
+            poemFirstHemistich.text = items[0]
+            poemTitle.text = "غزل شماره ${poemIndex.toInt()+1}"
+            index = poemIndex.toInt()
+        }
 //        val parent = poemRecycler.parent as ViewGroup
 //        val layoutparam = parent.layoutParams as FrameLayout.LayoutParams
 //        var marginLayoutParams = ViewGroup.MarginLayoutParams(poemRecycler.layoutParams)
 //        marginLayoutParams.setMargins(0,param.height,0,0)
 //        poemRecycler.layoutParams = marginLayoutParams
-        mediaPlayer = MediaPlayer.create(activity!!,R.raw.hafez_001)
+        val trackNumber = createfileNum(index)
+        val filename = BASE_URL + trackNumber + FILE_POSFIX
+        val url = "http://dl.baranhits.ir/dl/music/98-08/Shadmehr_Aghili_Khaabe_Khosh.mp3"
+        Log.d("filename","index is ${index} and file name is $filename")
+        //mediaPlayer = MediaPlayer.create(activity!!,R.raw.hafez_001)
+        mediaPlayer = MediaPlayer().apply {
+            setAudioStreamType(AudioManager.STREAM_MUSIC)
+            setDataSource(url)
+            prepare() // might take long! (for buffering, etc)
+            start()
+        }
         initializeSeekBar()
 
         playPoemButton.setOnClickListener{
@@ -113,8 +144,14 @@ class HafezFragment : Fragment() {
                 context!!.toast("media playing")
             }else{
 
-                mediaPlayer = MediaPlayer.create(activity!!,R.raw.hafez_001)
-                mediaPlayer.start()
+//                mediaPlayer = MediaPlayer.create(activity!!,R.raw.hafez_001)
+//                mediaPlayer.start()
+                mediaPlayer = MediaPlayer().apply {
+                    setAudioStreamType(AudioManager.STREAM_MUSIC)
+                    setDataSource(url)
+                    prepare() // might take long! (for buffering, etc)
+                    start()
+                }
                 context!!.toast("media playing")
 
             }
@@ -185,23 +222,23 @@ class HafezFragment : Fragment() {
 
 
 
-        if (poemIndex == "500"){
-            context!!.toast("came from home")
-            ResourceHelper.getInstance(activity!!).getPoemData(activity!!,rnd)
-            items = ResourceHelper.getInstance(activity!!).getPoems()
-            evaluate= ResourceHelper.getInstance(activity!!).getEvaluate()
-            poemFirstHemistich.text = items[0]
-            poemTitle.text = "غزل شماره ${rnd+1}"
-            index = rnd
-        }else {
-            context!!.toast("came from gallery")
-            ResourceHelper.getInstance(activity!!).getPoemData(activity!!,poemIndex.toInt())
-            items = ResourceHelper.getInstance(activity!!).getPoems()
-            evaluate= ResourceHelper.getInstance(activity!!).getEvaluate()
-            poemFirstHemistich.text = items[0]
-            poemTitle.text = "غزل شماره ${poemIndex.toInt()+1}"
-            index = poemIndex.toInt()
-        }
+//        if (poemIndex == "500"){
+//            context!!.toast("came from home")
+//            ResourceHelper.getInstance(activity!!).getPoemData(activity!!,rnd)
+//            items = ResourceHelper.getInstance(activity!!).getPoems()
+//            evaluate= ResourceHelper.getInstance(activity!!).getEvaluate()
+//            poemFirstHemistich.text = items[0]
+//            poemTitle.text = "غزل شماره ${rnd+1}"
+//            index = rnd
+//        }else {
+//            context!!.toast("came from gallery")
+//            ResourceHelper.getInstance(activity!!).getPoemData(activity!!,poemIndex.toInt())
+//            items = ResourceHelper.getInstance(activity!!).getPoems()
+//            evaluate= ResourceHelper.getInstance(activity!!).getEvaluate()
+//            poemFirstHemistich.text = items[0]
+//            poemTitle.text = "غزل شماره ${poemIndex.toInt()+1}"
+//            index = poemIndex.toInt()
+//        }
 
 
 //        poemFirstHemistich.text = items[0]
@@ -314,6 +351,18 @@ class HafezFragment : Fragment() {
 //        if (faves.contains(index))
 //            return true
         return false
+    }
+
+    private fun createfileNum(index: Int): String {
+        if(index < 10){
+            return "00".plus(index.toString())
+            Log.d("filename","00".plus(index.toString()))
+        } else if (index in 10..99 ){
+            return "0".plus(index.toString())
+            Log.d("filename","0".plus(index.toString()))
+        }
+        Log.d("filename",(index.toString()))
+        return index.toString()
     }
 
 }
