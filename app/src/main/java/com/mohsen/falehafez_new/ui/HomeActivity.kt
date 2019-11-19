@@ -1,5 +1,6 @@
 package com.mohsen.falehafez_new.ui
 
+import android.content.Intent
 import android.os.Bundle
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
@@ -13,11 +14,42 @@ import com.google.android.material.navigation.NavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import android.view.Menu
+import android.view.MenuItem
+import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import com.mohsen.falehafez_new.BaseActivity
 import com.mohsen.falehafez_new.R
+import com.mohsen.falehafez_new.ui.ui.faves.FavesFragment
+import com.mohsen.falehafez_new.util.toast
+import androidx.core.app.ComponentActivity
+import androidx.core.app.ComponentActivity.ExtraData
+import androidx.core.content.ContextCompat.getSystemService
+import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 
-class HomeActivity : BaseActivity() {
+
+
+class HomeActivity : BaseActivity() , NavigationView.OnNavigationItemSelectedListener {
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        val fragmentManager = supportFragmentManager
+        val favesFragment = FavesFragment()
+        when(item.itemId){
+            R.id.nav_share ->{
+                toast("clicked on share button")
+                share()
+                return true
+            }
+            R.id.nav_faves-> {
+//                fragmentManager.popBackStack()
+//                fragmentManager.beginTransaction().replace(R.id.flContent,favesFragment).commit();
+            }
+
+            R.id.nav_rating ->{
+                toast("هنوز پیاده سازی نشده است.")
+            }
+
+        }
+        return false
+    }
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     lateinit var navController: NavController
@@ -35,12 +67,15 @@ class HomeActivity : BaseActivity() {
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.nav_home, R.id.nav_faves, R.id.nav_rating,
-                R.id.nav_share
+                R.id.nav_home, R.id.nav_faves, R.id.nav_rating,R.id.nav_send
             ), drawerLayout
         )
+
+
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+      //  navView.setNavigationItemSelectedListener(this)
+
     }
 
 
@@ -48,4 +83,16 @@ class HomeActivity : BaseActivity() {
         val navController = findNavController(R.id.nav_host_fragment)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
+
+    private fun share(){
+        val intent = Intent(Intent.ACTION_SEND)
+        intent.setType("text/plain")
+        val body = "Your body here"
+        val sub = "Your Subject"
+        intent.putExtra(Intent.EXTRA_SUBJECT,sub);
+        intent.putExtra(Intent.EXTRA_TEXT,body);
+        startActivity(Intent.createChooser(intent, "Share Using"))
+    }
+
+
 }

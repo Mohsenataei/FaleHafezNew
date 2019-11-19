@@ -22,10 +22,39 @@ class SendFragment : Fragment() {
         sendViewModel =
             ViewModelProviders.of(this).get(SendViewModel::class.java)
         val root = inflater.inflate(R.layout.fragment_send, container, false)
-        val textView: TextView = root.findViewById(R.id.text_send)
-        sendViewModel.text.observe(this, Observer {
-            textView.text = it
+        val text1: TextView = root.findViewById(R.id.text1)
+        sendViewModel.text1.observe(this, Observer {
+            text1.text = it
         })
+        val text2: TextView = root.findViewById(R.id.text2)
+        sendViewModel.text2.observe(this, Observer {
+            text2.text = it
+        })
+        val text3: TextView = root.findViewById(R.id.text3)
+        sendViewModel.text3.observe(this, Observer {
+            text3.text = it
+        })
+
+        val text4: TextView = root.findViewById(R.id.text4)
+        sendViewModel.text4.observe(this, Observer {
+            text4.text = it
+        })
+
+        val text5: TextView = root.findViewById(R.id.text5)
+        sendViewModel.text5.observe(this, Observer {
+            text5.text = it
+        })
+
+
+
+
+
+
+
         return root
+    }
+
+    private fun setTextViews(viewmodel: SendViewModel){
+
     }
 }

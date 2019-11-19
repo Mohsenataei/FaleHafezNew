@@ -12,11 +12,14 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.mohsen.falehafez_new.R
 import com.mohsen.falehafez_new.adapter.AllPoemAdapter
 import com.mohsen.falehafez_new.adapter.FavedPoemAdapter
 import com.mohsen.falehafez_new.model.FavedPoem
+import com.mohsen.falehafez_new.ui.ui.hafez.HafezFragment
 import com.mohsen.falehafez_new.util.ItemClickListener
 import com.mohsen.falehafez_new.util.ResourceHelper
 import com.mohsen.falehafez_new.util.UserPrefs
@@ -25,9 +28,13 @@ import kotlinx.android.synthetic.main.fragment_tools.*
 
 class FavesFragment : Fragment(), ItemClickListener {
     lateinit var navController: NavController
-    override fun onItemClicked(index: Int) {
 
+    override fun onItemClicked(index: Int) {
+       // val fragmentManager = activity!!.supportFragmentManager
         val bundle = bundleOf("index" to index.toString())
+//        val hafezFragment = HafezFragment()
+//        hafezFragment.poemIndex = index.toString()
+//        fragmentManager.beginTransaction().replace(R.id.flContent,hafezFragment).commit()
 
         context!!.toast("in faves fragment detected click")
         navController.navigate(R.id.action_nav_faves_to_hafezFragment,bundle)
@@ -52,6 +59,7 @@ class FavesFragment : Fragment(), ItemClickListener {
         toolsViewModel.text.observe(this, Observer {
             textView.text = it
         })
+       // navController = Navigation.findNavController(view)
         return root
     }
 

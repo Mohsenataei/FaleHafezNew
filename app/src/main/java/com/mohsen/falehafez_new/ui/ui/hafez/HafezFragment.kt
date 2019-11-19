@@ -30,6 +30,8 @@ import com.mohsen.falehafez_new.util.*
 import com.mohsen.falehafez_new.util.Constants.BASE_URL
 import kotlinx.android.synthetic.main.fragment_hafez.*
 import com.mohsen.falehafez_new.ui.ui.hafez.HafezViewModel as HafezViewModel1
+import java.io.IOException
+
 
 /**
  * A simple [Fragment] subclass.
@@ -39,7 +41,7 @@ class HafezFragment : Fragment() {
     val array = intArrayOf(1,2,3,4)
     val FILE_PREFIX = "Hafez - "
     val FILE_POSFIX = ".mp3"
-    val BASE_URL = "http://localhost:8086/downloadFile/Hafez - "
+    val BASE_URL = "192.168.122.1:8086/downloadFile/Hafez - "
     lateinit var navController: NavController
     lateinit var adapter: PoemAdapter
     lateinit var hafezViewModel: HafezViewModel1
@@ -114,58 +116,72 @@ class HafezFragment : Fragment() {
             poemTitle.text = "غزل شماره ${poemIndex.toInt()+1}"
             index = poemIndex.toInt()
         }
-//        val parent = poemRecycler.parent as ViewGroup
-//        val layoutparam = parent.layoutParams as FrameLayout.LayoutParams
-//        var marginLayoutParams = ViewGroup.MarginLayoutParams(poemRecycler.layoutParams)
-//        marginLayoutParams.setMargins(0,param.height,0,0)
-//        poemRecycler.layoutParams = marginLayoutParams
         val trackNumber = createfileNum(index)
-        val filename = BASE_URL + trackNumber + FILE_POSFIX
-        val url = "http://dl.baranhits.ir/dl/music/98-08/Shadmehr_Aghili_Khaabe_Khosh.mp3"
-        Log.d("filename","index is ${index} and file name is $filename")
-        //mediaPlayer = MediaPlayer.create(activity!!,R.raw.hafez_001)
+        val fileUrl= BASE_URL + trackNumber + FILE_POSFIX
+        //val url = "http://dl.baranhits.ir/dl/music/98-08/Shadmehr_Aghili_Khaabe_Khosh.mp3"
+//        Log.d("filename","index is ${index} and file name is $fileUrl")
+//        mediaPlayer = MediaPlayer.create(activity!!,R.raw.hafez_001)
         mediaPlayer = MediaPlayer().apply {
             setAudioStreamType(AudioManager.STREAM_MUSIC)
-            setDataSource(url)
-            prepare() // might take long! (for buffering, etc)
+            setDataSource("http://dl.pop-music.ir/music/1394/Azar/Meysam%20Ebrahimi%20-%20To%20o%20Man.mp3")
+            prepareAsync() // might take long! (for buffering, etc)
             start()
         }
         initializeSeekBar()
+//
+//        mediaPlayer.setOnErrorListener { mp, what, extra ->
+//            mp.reset()
+//            false
+//        }
+//        mediaPlayer.setOnPreparedListener { mp -> mp.start() }
+
 
         playPoemButton.setOnClickListener{
             context!!.toast("detect click")
-            pausePoemButton.visibility = View.VISIBLE
-            playPoemButton.visibility = View.GONE
+            if (checkConnection(activity!!)){
+                context!!.toast("network status: " + checkConnection(activity!!).toString())
 
-            if(pause){
-                mediaPlayer.seekTo(mediaPlayer.currentPosition)
-                mediaPlayer.start()
-                pause = false
-                context!!.toast("media playing")
-            }else{
+                pausePoemButton.visibility = View.VISIBLE
+                playPoemButton.visibility = View.GONE
 
+                if(pause){
+                    mediaPlayer.seekTo(mediaPlayer.currentPosition)
+                    mediaPlayer.start()
+                    pause = !pause
+                    context!!.toast("media playing")
+                }else{
 //                mediaPlayer = MediaPlayer.create(activity!!,R.raw.hafez_001)
 //                mediaPlayer.start()
-                mediaPlayer = MediaPlayer().apply {
-                    setAudioStreamType(AudioManager.STREAM_MUSIC)
-                    setDataSource(url)
-                    prepare() // might take long! (for buffering, etc)
-                    start()
+                    mediaPlayer = MediaPlayer().apply {
+                        setAudioStreamType(AudioManager.STREAM_MUSIC)
+                        setDataSource("http://dl.pop-music.ir/music/1394/Azar/Meysam%20Ebrahimi%20-%20To%20o%20Man.mp3")
+                        prepareAsync() // might take long! (for buffering, etc)
+                        start()
+                    }
+//                try {
+//                    mediaPlayer.setDataSource("http://someurl")
+//                    mediaPlayer.prepareAsync()
+//                } catch (e: IllegalArgumentException) {
+//                } catch (e: IllegalStateException) {
+//                } catch (e: IOException) {
+//                }
+                    context!!.toast("media playing")
+
                 }
-                context!!.toast("media playing")
+                playPoemButton.isEnabled = false
+                pausePoemButton.isEnabled = true
+                stopPoemButton.isEnabled = true
 
+                mediaPlayer.setOnCompletionListener {
+                    playPoemButton.isEnabled = true
+                    pausePoemButton.isEnabled = false
+                    stopPoemButton.isEnabled = false
+                    context!!.toast("setOnCompletionListener end")
+                }
+            }else{
+                activity!!.toast("network not connected.")
             }
 
-            playPoemButton.isEnabled = false
-            pausePoemButton.isEnabled = true
-            stopPoemButton.isEnabled = true
-
-            mediaPlayer.setOnCompletionListener {
-                playPoemButton.isEnabled = true
-                pausePoemButton.isEnabled = false
-                stopPoemButton.isEnabled = false
-                context!!.toast("end")
-            }
         }
 
         // Pause the media player
@@ -252,7 +268,7 @@ class HafezFragment : Fragment() {
         PoemInterpretationTv.text = evaluate
         adapter = PoemAdapter(activity!!, items)
 
-        poemRecycler.layoutManager = LinearLayoutManager(activity!!)
+        poemRecycler.layoutManager = LinearLayoutManager(activity)
 
         poemRecycler.adapter = adapter
         poemFirstHemistich.setOnClickListener {
@@ -260,12 +276,6 @@ class HafezFragment : Fragment() {
         }
     }
 
-
-    private fun init(){
-        topSection.doOnLayout {
-
-        }
-    }
 
     override fun onResume() {
         super.onResume()
@@ -314,10 +324,14 @@ class HafezFragment : Fragment() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+
         if (isFaved(index)){
+            activity!!.toast("this poem is faved")
             inflater!!.inflate(R.menu.hafez_bookmarked,menu)
         }else{
             inflater!!.inflate(R.menu.hafez,menu)
+            activity!!.toast("this poem is not faved")
+
         }
 
         super.onCreateOptionsMenu(menu, inflater)
@@ -329,6 +343,7 @@ class HafezFragment : Fragment() {
             R.id.hafez_fave_option ->{
                 if (isFaved(index)){
                     item.setIcon(R.drawable.ic_favorite_border_black_24dp)
+                    Log.d("aaa","removed item index :" + index.toString())
                     userPrefs.removeFromFaveList(activity!!,index)
                     Log.d("prefs", userPrefs.getFavedPoems(activity!!))
                     context!!.toast("poem removed from faved list")
@@ -347,9 +362,9 @@ class HafezFragment : Fragment() {
     }
 
     private fun isFaved(index: Int): Boolean {
-//        val faves = userPrefs.getFavedPoemList(activity!!)
-//        if (faves.contains(index))
-//            return true
+        val faves = userPrefs.getFavedPoemList(activity!!)
+        if (faves.contains(index))
+            return true
         return false
     }
 

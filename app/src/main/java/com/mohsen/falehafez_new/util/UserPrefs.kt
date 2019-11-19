@@ -22,24 +22,35 @@ class UserPrefs (context: Context){
         return getSharedPreferences(context).getString("indexes","")!!
     }
 
-    fun getFavedPoemList(context: Context) =
-        getSharedPreferences(context).getString("indexes","")!!.split(",").map {
-            it.toInt()
-        }.also {
-            Log.d("userPrefs","${it}")
+    fun getFavedPoemList(context: Context) :List<Int> {
+      //  var result = List<Int>()
+        val temp = getSharedPreferences(context).getString("indexes","")!!
+        if (temp == ""){
+            return emptyList()
+        }else {
+            return temp.split(",").map {
+                it.toInt()
+            }.also {
+                Log.d("userPrefs","faved poems are : ${it}")
+            }
         }
+    }
+
 
 
     fun removeFromFaveList(context: Context,index:Int) {
         val list = getFavedPoemList(context) as MutableList
         Log.d("userPrefs", "list before delete any item : " + list.toString())
+
         for (item in list) {
             if (item == index) {
                 Log.d("userPrefs", "removed item : " + index.toString())
                 list.remove(index)
                 Log.d("userPrefs", "list contains : " + list.toString())
+                break
             }
         }
+
         Log.d("userPrefs", "list after deleting item " + list.concatFavList() )
         favedList = list.concatFavList()
         val editor = getSharedPreferences(context).edit()
