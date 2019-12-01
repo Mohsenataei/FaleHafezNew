@@ -24,7 +24,7 @@ val MediaPlayer.seconds:Int
 // Creating an extension property to get media player current position in seconds
 val MediaPlayer.currentSeconds:Int
     get() {
-        return this.currentPosition/1000
+        return this.currentPosition!!/1000
     }
 
 fun convertFavedPoemIndexToString(indexes: IntArray): String{

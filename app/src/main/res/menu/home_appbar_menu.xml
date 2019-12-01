@@ -13,9 +13,8 @@
         android:id="@+id/action_rate"
         android:orderInCategory="100"
         android:icon="@drawable/ic_star"
-        android:iconTint="@color/white"
+        android:iconTint="#FFF"
         android:title="@string/rate_us"
         app:showAsAction="always" />
-
 
 </menu>

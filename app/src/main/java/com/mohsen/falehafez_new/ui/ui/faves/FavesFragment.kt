@@ -19,7 +19,6 @@ import com.mohsen.falehafez_new.R
 import com.mohsen.falehafez_new.adapter.AllPoemAdapter
 import com.mohsen.falehafez_new.adapter.FavedPoemAdapter
 import com.mohsen.falehafez_new.model.FavedPoem
-import com.mohsen.falehafez_new.ui.ui.hafez.HafezFragment
 import com.mohsen.falehafez_new.util.ItemClickListener
 import com.mohsen.falehafez_new.util.ResourceHelper
 import com.mohsen.falehafez_new.util.UserPrefs
@@ -30,14 +29,14 @@ class FavesFragment : Fragment(), ItemClickListener {
     lateinit var navController: NavController
 
     override fun onItemClicked(index: Int) {
-       // val fragmentManager = activity!!.supportFragmentManager
+        // val fragmentManager = activity!!.supportFragmentManager
         val bundle = bundleOf("index" to index.toString())
 //        val hafezFragment = HafezFragment()
 //        hafezFragment.poemIndex = index.toString()
 //        fragmentManager.beginTransaction().replace(R.id.flContent,hafezFragment).commit()
 
-        context!!.toast("in faves fragment detected click")
-        navController.navigate(R.id.action_nav_faves_to_hafezFragment,bundle)
+        //context!!.toast("in faves fragment detected click")
+        navController.navigate(R.id.action_nav_faves_to_hafezFragment, bundle)
     }
 
     private lateinit var toolsViewModel: FavesViewModel
@@ -59,7 +58,7 @@ class FavesFragment : Fragment(), ItemClickListener {
         toolsViewModel.text.observe(this, Observer {
             textView.text = it
         })
-       // navController = Navigation.findNavController(view)
+        // navController = Navigation.findNavController(view)
         return root
     }
 
@@ -69,20 +68,21 @@ class FavesFragment : Fragment(), ItemClickListener {
         userPrefs = UserPrefs(activity!!)
         favedPoems = userPrefs.getFavedPoemList(activity!!)
 
-        val aaa : MutableList<Int> = ArrayList<Int>()
-        for (item in favedPoems){
+        val aaa: MutableList<Int> = ArrayList()
+        for (item in favedPoems) {
             Log.d("Faves", item.toString())
 
-                aaa.add(item.toInt())
+            aaa.add(item)
 
         }
 
-        if(favedPoems.isEmpty()){
+
+        if (favedPoems.isEmpty()) {
             favesTV.visibility = View.VISIBLE
-        }else{
-            ResourceHelper.getInstance(activity!!).getPoemData(activity!!,0)
-            list = ResourceHelper.getInstance(activity!!).getFavesList(activity!!,favedPoems)
-            adapter = FavedPoemAdapter(activity!!,list,this)
+        } else {
+            ResourceHelper.getInstance(activity!!).getPoemData(activity!!, 0)
+            list = ResourceHelper.getInstance(activity!!).getFavesList(activity!!, favedPoems)
+            adapter = FavedPoemAdapter(activity!!, list, this)
             favesPoemsRecycler.layoutManager = LinearLayoutManager(activity!!)
             favesPoemsRecycler.adapter = adapter
         }

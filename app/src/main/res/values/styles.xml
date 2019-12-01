@@ -9,6 +9,11 @@
         <item name="android:textViewStyle">@style/TextView</item>
         <item name="android:editTextStyle">@style/EditText</item>
         <item name="android:buttonStyle">@style/Button</item>
+        <item name="android:searchViewStyle">@style/SearchView</item>
+    </style>
+    <style name="ActionBarThemeOverlay">
+        <item name="fontFamily">@font/main_font_family</item>
+        <item name="android:gravity">right</item>
     </style>
 
     <style name="TextAppearance.Widget.ActionBar.Title"
@@ -50,6 +55,10 @@
         <item name="android:gravity">right</item>
     </style>
     <style name="Button">
+        <item name="fontFamily">@font/main_font_family</item>
+        <item name="android:gravity">right</item>
+    </style>
+    <style name="SearchView">
         <item name="fontFamily">@font/main_font_family</item>
         <item name="android:gravity">right</item>
     </style>

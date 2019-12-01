@@ -8,10 +8,11 @@ import android.widget.AdapterView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.mohsen.falehafez_new.R
+import com.mohsen.falehafez_new.model.FavedPoem
 import com.mohsen.falehafez_new.util.ItemClickListener
 import kotlinx.android.synthetic.main.poem_list_item.view.*
 
-class AllPoemAdapter (val context: Context, val items: List<String>, val itemClickListener: ItemClickListener): RecyclerView.Adapter<AllPoemAdapter.ListHolder>(){
+class AllPoemAdapter (val context: Context, val items: List<FavedPoem>, val itemClickListener: ItemClickListener): RecyclerView.Adapter<AllPoemAdapter.ListHolder>(){
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListHolder {
@@ -25,7 +26,7 @@ class AllPoemAdapter (val context: Context, val items: List<String>, val itemCli
     }
 
     override fun onBindViewHolder(holder: ListHolder, position: Int) {
-        holder.bind(position,items[position],itemClickListener)
+        holder.bind(items[position].index,items[position].title,itemClickListener)
     }
 
     class ListHolder(view: View): RecyclerView.ViewHolder(view) {

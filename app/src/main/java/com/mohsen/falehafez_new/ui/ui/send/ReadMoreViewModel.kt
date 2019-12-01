@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import com.mohsen.falehafez_new.R
 import kotlinx.android.synthetic.main.fragment_send.view.*
 
-class SendViewModel(application: Application) : AndroidViewModel(application) {
+class ReadMoreViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _text1 = MutableLiveData<String>().apply {
         value = getApplication<Application>().getString(R.string.text1)

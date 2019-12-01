@@ -2,8 +2,6 @@ package com.mohsen.falehafez_new.ui
 
 import android.content.Intent
 import android.os.Bundle
-import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.snackbar.Snackbar
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -11,45 +9,41 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import android.view.Menu
 import android.view.MenuItem
-import androidx.fragment.app.Fragment
 import androidx.navigation.NavController
 import com.mohsen.falehafez_new.BaseActivity
 import com.mohsen.falehafez_new.R
 import com.mohsen.falehafez_new.ui.ui.faves.FavesFragment
 import com.mohsen.falehafez_new.util.toast
-import androidx.core.app.ComponentActivity
-import androidx.core.app.ComponentActivity.ExtraData
-import androidx.core.content.ContextCompat.getSystemService
-import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 
 
 
-class HomeActivity : BaseActivity() , NavigationView.OnNavigationItemSelectedListener {
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        val fragmentManager = supportFragmentManager
-        val favesFragment = FavesFragment()
-        when(item.itemId){
-            R.id.nav_share ->{
-                toast("clicked on share button")
-                share()
-                return true
-            }
-            R.id.nav_faves-> {
-//                fragmentManager.popBackStack()
-//                fragmentManager.beginTransaction().replace(R.id.flContent,favesFragment).commit();
-            }
 
-            R.id.nav_rating ->{
-                toast("هنوز پیاده سازی نشده است.")
-            }
 
-        }
-        return false
-    }
+
+class HomeActivity : BaseActivity() {
+//    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+//        val fragmentManager = supportFragmentManager
+//        val favesFragment = FavesFragment()
+//        when(item.itemId){
+//            R.id.nav_share ->{
+//                //toast("clicked on share button")
+//                share()
+//                return true
+//            }
+//            R.id.nav_faves-> {
+////                fragmentManager.popBackStack()
+////                fragmentManager.beginTransaction().replace(R.id.flContent,favesFragment).commit();
+//            }
+//
+//            R.id.nav_rating ->{
+//                //toast("هنوز پیاده سازی نشده است.")
+//            }
+//
+//        }
+//        return false
+//    }
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     lateinit var navController: NavController
@@ -93,6 +87,8 @@ class HomeActivity : BaseActivity() , NavigationView.OnNavigationItemSelectedLis
         intent.putExtra(Intent.EXTRA_TEXT,body);
         startActivity(Intent.createChooser(intent, "Share Using"))
     }
+
+
 
 
 }

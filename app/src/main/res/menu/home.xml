@@ -7,6 +7,4 @@
         android:icon="@drawable/ic_favorite_black_24dp"
         android:title="@string/add_to_faves"
         app:showAsAction="always" />
-
-
 </menu>
