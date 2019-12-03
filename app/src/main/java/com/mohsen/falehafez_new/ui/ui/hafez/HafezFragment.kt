@@ -29,8 +29,10 @@ import com.mohsen.falehafez_new.ui.HomeActivity
 import com.mohsen.falehafez_new.util.*
 import com.mohsen.falehafez_new.util.Constants.BASE_URL
 import kotlinx.android.synthetic.main.fragment_hafez.*
+import nl.changer.audiowife.AudioWife
 import com.mohsen.falehafez_new.ui.ui.hafez.HafezViewModel as HafezViewModel1
 import java.io.IOException
+import android.widget.Toast
 
 
 /**
@@ -125,16 +127,22 @@ class HafezFragment : Fragment() {
         //val url = "http://dl.baranhits.ir/dl/music/98-08/Shadmehr_Aghili_Khaabe_Khosh.mp3"
 //        Log.d("filename","index is ${index} and file name is $fileUrl")
 //        mediaPlayer = MediaPlayer.create(activity!!,R.raw.hafez_001)
-        mediaPlayer = MediaPlayer().apply {
-            setAudioStreamType(AudioManager.STREAM_MUSIC)
-            setDataSource(fileUrl)
-            prepare() // might take long! (for buffering, etc)
+//        mediaPlayer = MediaPlayer().apply {
+//            setAudioStreamType(AudioManager.STREAM_MUSIC)
+//            setDataSource(fileUrl)
+//            prepare() // might take long! (for buffering, etc)
+//
+//
+//        }
+        // initializeSeekBar()
 
+        //play(fileUrl)
 
-        }
-        initializeSeekBar()
-
-        play(fileUrl)
+        AudioWife.getInstance()
+            .init(context!!, Uri.parse(fileUrl))
+            .setPlayView(playPoemButton)
+            .setPauseView(pausePoemButton)
+            .setSeekBar(appCompatSeekBar)
 
         Log.d("HafezFragment", "onViewCreated invoked  ${items[0]}")
 
@@ -148,13 +156,6 @@ class HafezFragment : Fragment() {
             (context as HomeActivity).navController.navigate(R.id.hafezFragment)
         }
     }
-
-
-    override fun onStop() {
-        super.onStop()
-        mediaPlayer.release()
-    }
-
 
     private fun genRanNum(): Int {
         return (0..494).random()
@@ -236,35 +237,6 @@ class HafezFragment : Fragment() {
         Log.d("filename", (index.toString()))
         return index.toString()
     }
-
-
-
-    override fun onDestroy() {
-        super.onDestroy()
-        //  stopPoem()
-    }
-    override fun onResume() {
-        super.onResume()
-        activity!!.toast("onResume invoked.")
-        if (pause){
-            pause = false
-            playPoemButton.visibility = View.VISIBLE
-            pausePoemButton.visibility = View.GONE
-
-            playPoemButton.isEnabled = true
-            pausePoemButton.isEnabled = false
-            stopPoemButton.isEnabled = false
-        }
-    }
-    override fun onPause() {
-        super.onPause()
-        mediaPlayer.pause()
-//        pausePoemButton.visibility = View.GONE
-//        playPoemButton.visibility = View.VISIBLE
-
-    }
-
-
 
     private fun play(url: String) {
 
@@ -454,6 +426,15 @@ class HafezFragment : Fragment() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        AudioWife.getInstance().pause()
+    }
 
+    override fun onDestroy() {
+        super.onDestroy()
+       // activity!!.toast("ondestroy")
+        AudioWife.getInstance().release()
+    }
 }
 
