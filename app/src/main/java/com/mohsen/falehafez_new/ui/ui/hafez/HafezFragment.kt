@@ -1,38 +1,30 @@
 package com.mohsen.falehafez_new.ui.ui.hafez
 
 
-import android.media.AudioManager
+import android.content.ComponentName
+import android.content.Intent
+import android.content.ServiceConnection
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
+import android.os.IBinder
 import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
 import android.widget.FrameLayout
-import android.widget.LinearLayout
 import android.widget.SeekBar
-import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.doOnLayout
-import androidx.core.view.get
-import androidx.core.view.marginTop
-import androidx.core.widget.NestedScrollView
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
-
 import com.mohsen.falehafez_new.R
 import com.mohsen.falehafez_new.adapter.PoemAdapter
 import com.mohsen.falehafez_new.ui.HomeActivity
 import com.mohsen.falehafez_new.util.*
-import com.mohsen.falehafez_new.util.Constants.BASE_URL
 import kotlinx.android.synthetic.main.fragment_hafez.*
-import nl.changer.audiowife.AudioWife
-import com.mohsen.falehafez_new.ui.ui.hafez.HafezViewModel as HafezViewModel1
-import java.io.IOException
-import android.widget.Toast
+import com.mohsen.falehafez_new.util.MediaPlayerService
+import android.content.Context
 
 
 /**
@@ -41,21 +33,15 @@ import android.widget.Toast
 class HafezFragment : Fragment() {
 
     val array = intArrayOf(1, 2, 3, 4)
-    val FILE_PREFIX = "Hafez - "
     val FILE_POSFIX = ".mp3"
     val BASE_URL = "http://185.128.80.34:8080/DivanHafezVoice/Hafez%20-%20"
     lateinit var navController: NavController
     lateinit var adapter: PoemAdapter
-    lateinit var hafezViewModel: HafezViewModel1
-    lateinit var resourceHelper: ResourceHelper
     lateinit var userPrefs: UserPrefs
     lateinit var faved: String
     lateinit var seekBar: SeekBar
     lateinit var fileUrl: String
     var index = 0
-    // lateinit var mediaPlayer: MediaPlayer
-    var isPlaying = false
-
 
     private lateinit var mediaPlayer: MediaPlayer
     private lateinit var runnable: Runnable
@@ -67,6 +53,24 @@ class HafezFragment : Fragment() {
     var items: List<String> = ArrayList()
     var evaluate: String? = null
 
+    private lateinit var player : MediaPlayerService
+    private var serviceBound : Boolean = false
+
+
+    private var serviceConnection = object : ServiceConnection {
+        override fun onServiceDisconnected(name: ComponentName?) {
+            serviceBound = false;
+        }
+
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            val binder = service as MediaPlayerService.LocalBinder
+            player = binder.service
+            serviceBound = true
+        }
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
@@ -77,13 +81,8 @@ class HafezFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        //resourceHelper = ResourceHelper(activity!!)
-        // HafezViewModel1 = ViewModelProviders.of(this).get(HafezViewModel1::class.java)
 
-        val view = inflater.inflate(R.layout.fragment_hafez, container, false)
-
-        return view
+        return inflater.inflate(R.layout.fragment_hafez, container, false)
     }
 
 
@@ -124,28 +123,7 @@ class HafezFragment : Fragment() {
         val trackNumber = createfileNum(index + 1)
         fileUrl = BASE_URL + trackNumber + FILE_POSFIX
         Log.d("tracknum", trackNumber)
-        //val url = "http://dl.baranhits.ir/dl/music/98-08/Shadmehr_Aghili_Khaabe_Khosh.mp3"
-//        Log.d("filename","index is ${index} and file name is $fileUrl")
-//        mediaPlayer = MediaPlayer.create(activity!!,R.raw.hafez_001)
-//        mediaPlayer = MediaPlayer().apply {
-//            setAudioStreamType(AudioManager.STREAM_MUSIC)
-//            setDataSource(fileUrl)
-//            prepare() // might take long! (for buffering, etc)
-//
-//
-//        }
-        // initializeSeekBar()
-
-        //play(fileUrl)
-
-        AudioWife.getInstance()
-            .init(context!!, Uri.parse(fileUrl))
-            .setPlayView(playPoemButton)
-            .setPauseView(pausePoemButton)
-            .setSeekBar(appCompatSeekBar)
-
         Log.d("HafezFragment", "onViewCreated invoked  ${items[0]}")
-
         PoemInterpretationTv.text = evaluate
         adapter = PoemAdapter(activity!!, items)
 
@@ -155,14 +133,40 @@ class HafezFragment : Fragment() {
         poemFirstHemistich.setOnClickListener {
             (context as HomeActivity).navController.navigate(R.id.hafezFragment)
         }
+
+        sharePoemButton.setOnClickListener {
+            val sendIntent = ResourceHelper.getInstance(activity!!).getSharePoemsIntent()
+            startActivity(Intent.createChooser(sendIntent, resources.getText(R.string.send_to)))
+        }
+
+        playPoemButton.setOnClickListener {
+            playAudio(fileUrl)
+        }
+
     }
+
+    private fun doPlay(url: String, autoPlay: Boolean) {
+
+        AudioWifiLocal.getInstance().release()
+
+        AudioWifiLocal.getInstance()
+            .init(activity, Uri.parse(url))
+            .setPlayView(playPoemButton)
+            .setPauseView(pausePoemButton)
+            .setSeekBar(appCompatSeekBar)
+            .setAutoPlay(autoPlay)
+            .setRuntimeView(poemTotalTime)
+            .setTotalTimeView(poemTotalTime)
+
+    }
+
 
     private fun genRanNum(): Int {
         return (0..494).random()
     }
 
     private fun initializeSeekBar() {
-        appCompatSeekBar.max = mediaPlayer?.duration / 1000
+        appCompatSeekBar.max = mediaPlayer.duration / 1000
 
         runnable = Runnable {
             try {
@@ -238,203 +242,31 @@ class HafezFragment : Fragment() {
         return index.toString()
     }
 
-    private fun play(url: String) {
-
-        playPoemButton.setOnClickListener {
-            context!!.toast("detect click on play")
-            if (checkConnection(activity!!)) {
-                //context!!.toast("network status: " + checkConnection(activity!!).toString())
-                playPoemButton.visibility = View.GONE
-                pausePoemButton.visibility = View.VISIBLE
-                //initializeSeekBar()
-
-                if (pause) {
-                    mediaPlayer.seekTo(mediaPlayer.currentPosition)
-                    mediaPlayer.start()
-                    pause = !pause
-                    // context!!.toast("media playing")
-                } else {
-//                mediaPlayer = MediaPlayer.create(activity!!,R.raw.hafez_001)
-//                mediaPlayer.start()
-                    mediaPlayer = MediaPlayer().apply {
-                        setAudioStreamType(AudioManager.STREAM_MUSIC)
-                        setDataSource(url)
-                        prepare() // might take long! (for buffering, etc)
-                        start()
-                    }
-                }
-                playPoemButton.isEnabled = false
-                pausePoemButton.isEnabled = true
-                stopPoemButton.isEnabled = true
-
-                mediaPlayer.setOnCompletionListener {
-                    playPoemButton.isEnabled = true
-                    pausePoemButton.isEnabled = false
-                    stopPoemButton.isEnabled = false
-                    //context!!.toast("setOnCompletionListener end")
-                }
-            } else {
-                // activity!!.toast("network not connected.")
-            }
-
-        }
-
-        // Pause the media player
-        pausePoemButton.setOnClickListener {
-            context!!.toast("detect click on pause")
-            pausePoemButton.visibility = View.GONE
-            playPoemButton.visibility = View.VISIBLE
-            if (mediaPlayer.isPlaying) {
-                mediaPlayer.pause()
-                pause = true
-                playPoemButton.isEnabled = true
-                pausePoemButton.isEnabled = false
-                stopPoemButton.isEnabled = true
-                //context!!.toast("media paused.")
-            }
-        }
-
-        // Stop the media player
-        stopPoemButton.setOnClickListener {
-            context!!.toast("detect click on stop")
-            pausePoemButton.visibility = View.GONE
-            playPoemButton.visibility = View.VISIBLE
-            // context!!.toast("media stoped.")
-            try {
-                if (mediaPlayer.isPlaying || pause.equals(true)) {
-                    pause = false
-                    // appCompatSeekBar.setProgress(0)
-                    appCompatSeekBar.progress = 0
-                    mediaPlayer.stop()
-                    mediaPlayer.reset()
-                    mediaPlayer.release()
-                    handler.removeCallbacks(runnable)
-
-                    playPoemButton.isEnabled = true
-                    pausePoemButton.isEnabled = false
-                    stopPoemButton.isEnabled = false
-//                tv_pass.text = ""
-//                tv_due.text = ""
-                    // context!!.toast("media stoped.")
-                }
-            } catch (e: IllegalStateException) {
-                e.printStackTrace()
-            }
-        }
-
-        // Seek bar change listener
-//        playPoem()
-//        pausePoem()
-//        stopPoem()
-        appCompatSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar, i: Int, b: Boolean) {
-                if (b) {
-                    mediaPlayer.seekTo(i * 1000)
-                }
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar) {
-            }
-
-            override fun onStopTrackingTouch(seekBar: SeekBar) {
-            }
-        })
-    }
-
-
-    private fun playPoem() {
-        playPoemButton.setOnClickListener {
-            //  context!!.toast("detect click")
-            if (checkConnection(activity!!)) {
-                //context!!.toast("network status: " + checkConnection(activity!!).toString())
-                playPoemButton.visibility = View.GONE
-                pausePoemButton.visibility = View.VISIBLE
-                //initializeSeekBar()
-
-                if (pause) {
-                    mediaPlayer.seekTo(mediaPlayer.currentPosition)
-                    mediaPlayer.start()
-                    pause = !pause
-                    // context!!.toast("media playing")
-                } else {
-//                mediaPlayer = MediaPlayer.create(activity!!,R.raw.hafez_001)
-//                mediaPlayer.start()
-                    mediaPlayer = MediaPlayer().apply {
-                        setAudioStreamType(AudioManager.STREAM_MUSIC)
-                        setDataSource(fileUrl)
-                        prepare() // might take long! (for buffering, etc)
-                        start()
-                    }
-                }
-                playPoemButton.isEnabled = false
-                pausePoemButton.isEnabled = true
-                stopPoemButton.isEnabled = true
-
-                mediaPlayer.setOnCompletionListener {
-                    playPoemButton.isEnabled = true
-                    pausePoemButton.isEnabled = false
-                    stopPoemButton.isEnabled = false
-                    //context!!.toast("setOnCompletionListener end")
-                }
-            } else {
-                // activity!!.toast("network not connected.")
-            }
-
-        }
-    }
-
-    private fun pausePoem() {
-        pausePoemButton.setOnClickListener {
-            pausePoemButton.visibility = View.GONE
-            playPoemButton.visibility = View.VISIBLE
-            if (mediaPlayer.isPlaying) {
-                mediaPlayer.pause()
-                pause = true
-                playPoemButton.isEnabled = true
-                pausePoemButton.isEnabled = false
-                stopPoemButton.isEnabled = true
-                //context!!.toast("media paused.")
-            }
-        }
-    }
-
-    private fun stopPoem() {
-        stopPoemButton.setOnClickListener {
-            pausePoemButton.visibility = View.GONE
-            playPoemButton.visibility = View.VISIBLE
-            // context!!.toast("media stoped.")
-            try {
-                if (mediaPlayer.isPlaying || pause.equals(true)) {
-                    pause = false
-                    // appCompatSeekBar.setProgress(0)
-                    appCompatSeekBar.progress = 0
-                    mediaPlayer.stop()
-                    mediaPlayer.reset()
-                    mediaPlayer.release()
-                    handler.removeCallbacks(runnable)
-
-                    playPoemButton.isEnabled = true
-                    pausePoemButton.isEnabled = false
-                    stopPoemButton.isEnabled = false
-//                tv_pass.text = ""
-//                tv_due.text = ""
-                    // context!!.toast("media stoped.")
-                }
-            } catch (e: IllegalStateException) {
-                e.printStackTrace()
-            }
-        }
-    }
-
     override fun onPause() {
         super.onPause()
-        AudioWife.getInstance().pause()
+        AudioWifiLocal.getInstance().pause()
     }
 
     override fun onDestroy() {
         super.onDestroy()
        // activity!!.toast("ondestroy")
-        AudioWife.getInstance().release()
+        AudioWifiLocal.getInstance().release()
     }
+
+    private fun playAudio (media: String){
+        //Check is service is active
+        if (!serviceBound) {
+            val playerIntent = Intent(activity, MediaPlayerService::class.java)
+            playerIntent.putExtra("media", media)
+            activity?.startService(playerIntent)
+            activity?.bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE)
+        } else {
+            //Service is active
+            //Send media with BroadcastReceiver
+        }
+
+    }
+
+
 }
 

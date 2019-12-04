@@ -112,23 +112,23 @@ class ResourceHelper(context: Context) {
     }
 
 
-//    fun getSharePoemsIntent(): Intent {
-//        val poemItems=poem
-//        var message = "فال حافط \n\n"
-//        for (i in 0 until poemItems.size) {
-//            message += if (i % 2 == 0)
-//                poemItems[i] + "\n"
-//            else
-//                "\t\t\t\t\t" + poemItems[i]+"\n\n"
-//        }
-//        message+="تفسیر فال\n"
-//        message+=randomPoem.substring(randomPoem.lastIndexOf("n") + 1)+"\n"
-//        message+="\n برای دریافت اپلیکیشن هشدار از لینک زیر استفاده کنید"
-//        message+="\n$APP_ADDRESS"
-//        return Intent().apply {
-//            action = Intent.ACTION_SEND
-//            putExtra(Intent.EXTRA_TEXT, message)
-//            type = "text/plain"
-//        }
-//    }
+    fun getSharePoemsIntent(): Intent {
+        val poemItems=poem
+        var message = "فال حافط \n\n"
+        for (i in 0 until poemItems.size) {
+            message += if (i % 2 == 0)
+                poemItems[i] + "\n"
+            else
+                "\t\t\t\t\t" + poemItems[i]+"\n\n"
+        }
+        message+="تفسیر فال\n"
+        message+=randomPoem.substring(randomPoem.lastIndexOf("n") + 1)+"\n"
+        message+="\n برای دریافت اپلیکیشن هشدار از لینک زیر استفاده کنید"
+        //message+="\n$APP_ADDRESS"
+        return Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, message)
+            type = "text/plain"
+        }
+    }
 }
