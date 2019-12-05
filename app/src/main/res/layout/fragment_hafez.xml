@@ -119,6 +119,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <SeekBar
+            android:visibility="invisible"
             android:id="@+id/appCompatSeekBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

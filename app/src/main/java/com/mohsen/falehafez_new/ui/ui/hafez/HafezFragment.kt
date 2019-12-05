@@ -25,12 +25,20 @@ import com.mohsen.falehafez_new.util.*
 import kotlinx.android.synthetic.main.fragment_hafez.*
 import com.mohsen.falehafez_new.util.MediaPlayerService
 import android.content.Context
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import android.R.attr.name
+import java.lang.reflect.Array.getLength
+import android.content.res.AssetFileDescriptor
+import androidx.core.content.ContextCompat
+import android.R.attr.name
+import android.media.AudioManager
+import android.widget.Toast
 
 
 /**
  * A simple [Fragment] subclass.
  */
-class HafezFragment : Fragment() {
+class HafezFragment : Fragment(), Runnable {
 
     val array = intArrayOf(1, 2, 3, 4)
     val FILE_POSFIX = ".mp3"
@@ -39,11 +47,11 @@ class HafezFragment : Fragment() {
     lateinit var adapter: PoemAdapter
     lateinit var userPrefs: UserPrefs
     lateinit var faved: String
-    lateinit var seekBar: SeekBar
+    // lateinit var seekBar: SeekBar
     lateinit var fileUrl: String
     var index = 0
 
-    private lateinit var mediaPlayer: MediaPlayer
+    //private lateinit var mediaPlayer: MediaPlayer
     private lateinit var runnable: Runnable
     private var handler: Handler = Handler()
     private var pause: Boolean = false
@@ -53,8 +61,16 @@ class HafezFragment : Fragment() {
     var items: List<String> = ArrayList()
     var evaluate: String? = null
 
-    private lateinit var player : MediaPlayerService
-    private var serviceBound : Boolean = false
+    private lateinit var player: MediaPlayerService
+    private var serviceBound: Boolean = false
+
+    // new way to play audio variables :
+
+    //lateinit var mediaPlayer = MediaPlayer()
+    private var mediaPlayer: MediaPlayer? = null
+    var seekBar: SeekBar? = null
+    var wasPlaying = false
+    var fab: FloatingActionButton? = null
 
 
     private var serviceConnection = object : ServiceConnection {
@@ -84,7 +100,6 @@ class HafezFragment : Fragment() {
 
         return inflater.inflate(R.layout.fragment_hafez, container, false)
     }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -140,9 +155,106 @@ class HafezFragment : Fragment() {
         }
 
         playPoemButton.setOnClickListener {
-            playAudio(fileUrl)
+            //playAudio(fileUrl)
+            playPoem1()
+        }
+        pausePoemButton.setOnClickListener {
+            pausePoem1()
         }
 
+        stopPoemButton.setOnClickListener {
+            stopPoem()
+        }
+        appCompatSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (!fromUser) {
+                    mediaPlayer?.seekTo(progress * 1000)
+                }
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                if (mediaPlayer != null && mediaPlayer!!.isPlaying) {
+                    mediaPlayer?.seekTo(seekBar!!.progress)
+                }
+            }
+
+        })
+
+    }
+
+    private fun pausePoem() {
+        try {
+            if (mediaPlayer != null && mediaPlayer!!.isPlaying) {
+                clearMediaPlayer()
+                appCompatSeekBar?.progress = 0
+                wasPlaying = true
+                playPoemButton.visibility = View.GONE
+                pausePoemButton.visibility = View.VISIBLE
+            }
+
+            if (wasPlaying) {
+                if (mediaPlayer == null) {
+                    mediaPlayer = MediaPlayer()
+                }
+                playPoemButton.visibility = View.VISIBLE
+                pausePoemButton.visibility = View.GONE
+                mediaPlayer?.pause()
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun playPoem() {
+        try {
+
+            if (mediaPlayer != null && mediaPlayer!!.isPlaying) {
+                clearMediaPlayer()
+                appCompatSeekBar?.progress = 0
+                wasPlaying = true
+                playPoemButton.visibility = View.GONE
+                pausePoemButton.visibility = View.VISIBLE
+            }
+
+
+            if (!wasPlaying) {
+
+                if (mediaPlayer == null) {
+                    mediaPlayer = MediaPlayer()
+                }
+
+                playPoemButton.visibility = View.GONE
+                pausePoemButton.visibility = View.VISIBLE
+
+
+                mediaPlayer?.setAudioStreamType(AudioManager.STREAM_MUSIC)
+                mediaPlayer?.setDataSource(fileUrl)
+                mediaPlayer?.prepare()
+                //  mediaPlayer?.setVolume(0.5f, 0.5f)
+                mediaPlayer?.isLooping = false
+                appCompatSeekBar?.max = mediaPlayer!!.duration
+
+                mediaPlayer?.start()
+                Thread(this).start()
+
+            }
+
+            wasPlaying = false
+        } catch (e: Exception) {
+            e.printStackTrace()
+
+        }
+
+    }
+
+    private fun clearMediaPlayer() {
+        mediaPlayer?.stop()
+        mediaPlayer?.release()
+        mediaPlayer = null
     }
 
     private fun doPlay(url: String, autoPlay: Boolean) {
@@ -166,12 +278,12 @@ class HafezFragment : Fragment() {
     }
 
     private fun initializeSeekBar() {
-        appCompatSeekBar.max = mediaPlayer.duration / 1000
+        appCompatSeekBar.max = mediaPlayer!!.duration / 1000
 
         runnable = Runnable {
             try {
                 appCompatSeekBar!!.let {
-                    it.progress = mediaPlayer.currentSeconds
+                    it.progress = mediaPlayer!!.currentSeconds
                     handler.postDelayed(runnable, 1000)
                 }
             } catch (e: IllegalStateException) {
@@ -232,28 +344,31 @@ class HafezFragment : Fragment() {
 
     private fun createfileNum(index: Int): String {
         if (index < 10) {
-            return "00".plus(index.toString())
             Log.d("filename", "00".plus(index.toString()))
+            return "00".plus(index.toString())
         } else if (index in 10..99) {
-            return "0".plus(index.toString())
             Log.d("filename", "0".plus(index.toString()))
+            return "0".plus(index.toString())
         }
         Log.d("filename", (index.toString()))
         return index.toString()
     }
+
 
     override fun onPause() {
         super.onPause()
         AudioWifiLocal.getInstance().pause()
     }
 
+
     override fun onDestroy() {
         super.onDestroy()
-       // activity!!.toast("ondestroy")
-        AudioWifiLocal.getInstance().release()
+        // activity!!.toast("ondestroy")
+        //AudioWifiLocal.getInstance().release()
+        clearMediaPlayer();
     }
 
-    private fun playAudio (media: String){
+    private fun playAudio(media: String) {
         //Check is service is active
         if (!serviceBound) {
             val playerIntent = Intent(activity, MediaPlayerService::class.java)
@@ -267,6 +382,110 @@ class HafezFragment : Fragment() {
 
     }
 
+    override fun run() {
 
+        var currentPosition = mediaPlayer?.currentPosition
+        val total = mediaPlayer?.duration
+
+
+        while (mediaPlayer != null && mediaPlayer!!.isPlaying && currentPosition!! < total!!) {
+            try {
+                Thread.sleep(1000);
+                currentPosition = mediaPlayer?.currentPosition
+            } catch (e: InterruptedException) {
+                return
+            } catch (e: Exception) {
+                return
+            }
+
+            appCompatSeekBar?.progress = currentPosition!!
+
+        }
+    }
+
+
+    private fun playPoem1() {
+        appCompatSeekBar.visibility = View.VISIBLE
+        if (pause) {
+            mediaPlayer?.seekTo(mediaPlayer!!.currentPosition)
+            mediaPlayer?.start()
+            pause = false
+            Toast.makeText(activity, "media playing", Toast.LENGTH_SHORT).show()
+        } else {
+
+            mediaPlayer = MediaPlayer()
+            mediaPlayer?.setAudioStreamType(AudioManager.STREAM_MUSIC)
+            mediaPlayer?.setDataSource(fileUrl)
+            mediaPlayer?.prepare()
+            //  mediaPlayer?.setVolume(0.5f, 0.5f)
+            mediaPlayer?.isLooping = false
+            appCompatSeekBar?.max = mediaPlayer!!.duration
+
+            mediaPlayer?.start()
+            Toast.makeText(activity, "media playing", Toast.LENGTH_SHORT).show()
+
+        }
+        initializeSeekBar()
+        playPoemButton.visibility = View.GONE
+        pausePoemButton.visibility = View.VISIBLE
+        playPoemButton.isEnabled = false
+        pausePoemButton.isEnabled = true
+        stopPoemButton.isEnabled = true
+
+        mediaPlayer?.setOnCompletionListener {
+            playPoemButton.isEnabled = true
+            playPoemButton.visibility = View.VISIBLE
+            pausePoemButton.visibility = View.GONE
+            pausePoemButton.isEnabled = false
+            stopPoemButton.isEnabled = false
+            Toast.makeText(activity, "end", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun pausePoem1() {
+        if (mediaPlayer!!.isPlaying) {
+            mediaPlayer!!.pause()
+            pause = true
+            playPoemButton.visibility = View.VISIBLE
+            pausePoemButton.visibility = View.GONE
+            playPoemButton.isEnabled = true
+            pausePoemButton.isEnabled = false
+            stopPoemButton.isEnabled = true
+            Toast.makeText(activity, "media pause", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
+    private fun stopPoem() {
+        appCompatSeekBar.visibility = View.INVISIBLE
+        if (mediaPlayer!!.isPlaying || pause.equals(true)) {
+            pause = false
+            appCompatSeekBar.progress = 0
+            mediaPlayer?.stop()
+            mediaPlayer?.reset()
+            mediaPlayer?.release()
+            handler.removeCallbacks(runnable)
+
+            pausePoemButton.visibility = View.GONE
+            playPoemButton.visibility = View.VISIBLE
+            playPoemButton.isEnabled = true
+            pausePoemButton.isEnabled = false
+            stopPoemButton.isEnabled = false
+
+            Toast.makeText(activity, "media stop", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
+    private fun initializeSeekBar1() {
+        appCompatSeekBar.max = mediaPlayer!!.seconds
+
+        runnable = Runnable {
+            appCompatSeekBar?.progress = mediaPlayer!!.currentSeconds
+
+            handler.postDelayed(runnable, 1000)
+        }
+        handler.postDelayed(runnable, 1000)
+    }
 }
 
